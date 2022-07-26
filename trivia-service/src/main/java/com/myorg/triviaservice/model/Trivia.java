@@ -1,7 +1,6 @@
 package com.myorg.triviaservice.model;
 
 import lombok.Data;
-import org.json.JSONArray;
 
 import java.util.List;
 

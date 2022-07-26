@@ -2,7 +2,6 @@ package com.myorg.triviaservice.controller;
 
 import com.myorg.triviaservice.model.TriviaQuestions;
 import com.myorg.triviaservice.service.TriviaService;
-import okhttp3.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
