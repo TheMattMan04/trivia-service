@@ -23,6 +23,7 @@ public class TriviaService {
     public TriviaQuestions getTriviaQuestions() {
         TriviaQuestions triviaQuestions = new TriviaQuestions();
         List<Trivia> triviaList = new ArrayList<>();
+        String environment = configuration.getEnvironment();
 
         Request request = new Request.Builder()
                 .url(configuration.getUrl())
@@ -64,6 +65,7 @@ public class TriviaService {
                 triviaList.add(trivia);
             });
 
+            triviaQuestions.setEnvironment(environment);
             triviaQuestions.setResponseMessage("Success");
             triviaQuestions.setTriviaQuestions(triviaList);
 
