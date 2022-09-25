@@ -70,6 +70,7 @@ public class TriviaService {
             triviaQuestions.setTriviaQuestions(triviaList);
 
         } catch (IOException e) {
+            triviaQuestions.setEnvironment(environment);
             triviaQuestions.setResponseMessage("Error: " + e.getMessage());
             triviaQuestions.setTriviaQuestions(triviaList);
         }
