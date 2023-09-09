@@ -3,67 +3,43 @@ package com.myorg.triviaservice.service;
 import com.myorg.triviaservice.configuration.Configuration;
 import com.myorg.triviaservice.model.Trivia;
 import com.myorg.triviaservice.model.TriviaQuestions;
-import okhttp3.*;
+import lombok.AllArgsConstructor;
+import okhttp3.Call;
+import okhttp3.Response;
 import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@Component
+@Service
+@AllArgsConstructor
 public class TriviaService {
-
-    @Autowired
     private Configuration configuration;
-    private final OkHttpClient client = new OkHttpClient();
+    private TriviaRequestService triviaRequestService;
 
     public TriviaQuestions getTriviaQuestions() {
         TriviaQuestions triviaQuestions = new TriviaQuestions();
         List<Trivia> triviaList = new ArrayList<>();
         String environment = configuration.getEnvironment();
 
-        Request request = new Request.Builder()
-                .url(configuration.getUrl())
-                .build();
-
-        Call call = client.newCall(request);
+        Call triviaCall = triviaRequestService.makeTriviaCall();
 
         try {
-            Response response = call.execute();
+            Response response = triviaCall.execute();
 
             String responseBody = response.body().string();
 
             JSONArray triviaQuestionsArray = new JSONArray(responseBody);
 
-            triviaQuestionsArray.forEach(triviaQuestion -> {
-                Trivia trivia = new Trivia();
-
-                String triviaString = triviaQuestion.toString();
-
-                JSONObject triviaJson = new JSONObject(triviaString);
-
-                String category = triviaJson.getString("category");
-                String question = triviaJson.getString("question");
-                String correctAnswer = triviaJson.getString("correctAnswer");
-                JSONArray incorrectAnswers = triviaJson.getJSONArray("incorrectAnswers");
-
-                trivia.setCategory(category);
-                trivia.setQuestion(question);
-                trivia.setCorrectAnswer(correctAnswer);
-
-                List<String> incorrectAnswerList = new ArrayList<>();
-
-                incorrectAnswers.forEach(incorrect -> {
-                    incorrectAnswerList.add(incorrect.toString());
-                });
-
-                trivia.setIncorrectAnswers(incorrectAnswerList);
-
-                triviaList.add(trivia);
-            });
+            triviaQuestionsArray
+                    .toList()
+                    .stream()
+                    .map(triviaQuestion -> setTriviaQuestions(triviaQuestion, triviaList))
+                    .toList();
 
             triviaQuestions.setEnvironment(environment);
             triviaQuestions.setResponseMessage("Success");
@@ -78,4 +54,25 @@ public class TriviaService {
         return triviaQuestions;
     }
 
+    List<Trivia> setTriviaQuestions(Object triviaQuestion, List<Trivia> triviaList) {
+        Trivia trivia = new Trivia();
+
+        Map<String, String> triviaMap = (HashMap<String, String>) triviaQuestion;
+
+        String category = triviaMap.get("category");
+        String question = triviaMap.get("question");
+        String correctAnswer = triviaMap.get("correctAnswer");
+        Object incorrectAnswers = triviaMap.get("incorrectAnswers");
+
+        trivia.setCategory(category);
+        trivia.setQuestion(question);
+        trivia.setCorrectAnswer(correctAnswer);
+
+        List<Object> incorrectAnswerList = List.of(incorrectAnswers);
+
+        trivia.setIncorrectAnswers(incorrectAnswerList);
+        triviaList.add(trivia);
+
+        return triviaList;
+    }
 }
